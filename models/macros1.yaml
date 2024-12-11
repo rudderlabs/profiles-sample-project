@@ -1,0 +1,11 @@
+macros:
+  - name: multiply_add
+    inputs:
+      - a
+      - b
+    value: "{{a}} * 10 + {{ b}}"
+  - name: subtract_range
+    inputs:
+      - a
+      - b
+    value: "{{a}} - {{b}}"

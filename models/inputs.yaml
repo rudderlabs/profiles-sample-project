@@ -1,0 +1,79 @@
+inputs:
+  - name: tbl_a
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - user
+      with_columns:
+        - name: num_a
+    app_defaults:
+      csv: "csvs/Temp_tbl_a.csv"
+      occurred_at_col: insert_ts
+      ids:
+        - select: lower(id1)
+          type: email
+          entity: user
+        - select: "id2"
+          type: test_id
+          entity: user
+        - select: "id3"
+          type: exclude_id
+          entity: user
+  - name: tbl_b
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - user
+      with_columns:
+        - name: timestamp
+    app_defaults:
+      csv: "csvs/Temp_tbl_b.csv"
+      occurred_at_col: timestamp
+      ids:
+        - select: lower(id1)
+          type: email
+          entity: user
+        - select: "id2"
+          type: test_id
+          entity: user
+        - select: "id3"
+          type: test_id
+          entity: user
+  - name: tbl_c
+    contract:
+      is_optional: false
+      is_event_stream: false
+      with_entity_ids:
+        - user
+      with_columns:
+        - name: num_c
+        - name: num_b
+    app_defaults:
+      csv: "csvs/Temp_tbl_c.csv"
+      ids:
+        - select: lower(id1)
+          type: email
+          entity: user
+        - select: "id2"
+          type: test_id
+          entity: user
+  - name: tbl_d
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - user
+      with_columns:
+        - name: num_c
+    app_defaults:
+      table: Temp_tbl_d
+      occurred_at_col: timestamp
+      ids:
+        - select: "id1"
+          type: test_id
+          entity: user
+        - select: "id2"
+          type: test_id
+          entity: user

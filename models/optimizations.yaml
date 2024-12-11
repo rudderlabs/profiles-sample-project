@@ -1,0 +1,3 @@
+optimizations:
+  main_id_addition_approach: case_based_join
+  enable_input_columns_filtering: true

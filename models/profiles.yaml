@@ -1,0 +1,144 @@
+models:
+  - name: test_id__
+    model_type: id_stitcher
+    model_spec:
+      entity_key: user
+      materialization:
+        run_type: discrete
+      edge_sources:
+        - from: inputs/tbl_a
+        - from: inputs/tbl_b
+        - from: inputs/tbl_c
+  - name: test___ft
+    model_type: feature_table_model
+    model_spec:
+      entity_key: user
+      features:
+        - c_max
+        - c_max_plus_a_max
+        - c_max_where_c_gte_2x_amax
+        - first_num_b_order_num_b
+        - first_num_b_order_num_b_rank
+        - min_num_c_rank_num_b_partition
+        - max_num_c_rank_num_b_partition_x10_plus_num_c
+        - test_local_datediff_macro
+        - test_global_datediff_macro
+        - num_d # adding this to ensure that entity vars with name similar to a column in their select definition works
+        - var_with_figures
+        - var_with_figures_without_type
+        - id1_count_distinct
+var_groups:
+  - name: default_vars
+    entity_key: user
+    vars:
+      - entity_var:
+          name: a_max
+          select: max({{tbl_a.Var("num_a")}})
+          from: inputs/tbl_a
+          tags:
+            - revenue
+          is_feature: false
+          description: "entity_var's a_max."
+      - entity_var:
+          name: test_time_stamp
+          select: min({{tbl_b.Var("timestamp")}})
+          from: inputs/tbl_b
+          is_feature: false
+      - entity_var:
+          name: a_num_min
+          select: min({{tbl_a.Var("num_a")}})
+          from: inputs/tbl_a
+          is_feature: false
+      - entity_var:
+          name: a_range
+          select: "{{ subtract_range('{{user.Var(\"~/entity/user/all/a_max\")}}', '{{user.Var(\"./a_num_min\")}}') }}" # used full path and path from current folder here using prefixes to test both.
+          is_feature: false
+      - entity_var:
+          name: c_num_max
+          select: max({{tbl_c.Var("num_c")}})
+          from: inputs/tbl_c
+          is_feature: false
+      - entity_var:
+          name: c_max
+          select: "{{user.Var('c_num_max')}}"
+          description: "feature table's c_max."
+      - entity_var:
+          name: c_max_plus_a_max
+          select: max({{tbl_c.Var("num_c")}} + {{user.Var("a_max")}})
+          from: inputs/tbl_c
+          description: "\t `feature table's c_max_plus_a_max.`\t \n"
+          tags:
+            - revenue
+            - revenue2
+      - entity_var:
+          name: c_max_where_c_gte_2x_amax
+          select: max({{tbl_c.Var("num_c")}})
+          from: inputs/tbl_c
+          where: '{{tbl_c.Var("num_c")}} >= (2 * {{user.Var("a_max")}})'
+          description: feature table's c_max_where_c_gte_2x_amax can be calculated!
+      - entity_var:
+          name: first_num_b_order_num_b
+          select: first_value({{tbl_c.Var("num_b")}})
+          from: inputs/tbl_c
+          default_value: -1
+          where: 'num_b >= 10'
+          window:
+            order_by:
+              - 'num_b desc'
+            frame_clause: ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+      - entity_var:
+          name: first_num_b_order_num_b_rank
+          select: rank()
+          window:
+            partition_by:
+              - '{{user.Var("first_num_b_order_num_b")}} > 0'
+            order_by:
+              - '{{user.Var("first_num_b_order_num_b")}} asc'
+      - input_var:
+          name: num_c_rank_num_b_partition_var
+          select: rank()
+          from: inputs/tbl_c
+          default_value: -1
+          window:
+            partition_by:
+              - 'num_b'
+            order_by:
+              - 'num_c asc'
+          where: 'num_b >= 10'
+      - input_var:
+          name: num_c_rank_num_b_partition_x10_plus_num_c
+          select: "{{ multiply_add('{{tbl_c.Var(\"num_c_rank_num_b_partition_var\")}}', '{{tbl_c.Var(\"num_c\")}}') }}"
+          from: inputs/tbl_c
+      - entity_var:
+          name: min_num_c_rank_num_b_partition
+          select: min({{tbl_c.Var("num_c_rank_num_b_partition_var")}})
+          from: inputs/tbl_c
+      - entity_var:
+          name: max_num_c_rank_num_b_partition_x10_plus_num_c
+          select: max({{tbl_c.Var("num_c_rank_num_b_partition_x10_plus_num_c")}})
+          from: inputs/tbl_c
+      - entity_var:
+          name: d_num_c_max
+          select: max({{tbl_d.Var("num_c")}})
+          from: inputs/tbl_d
+      - entity_var:
+          name: test_local_datediff_macro
+          select: "{{ local_datediff_macro('{{user.Var(\"test_time_stamp\")}}') }}"
+      - entity_var:
+          name: test_global_datediff_macro
+          select: "{{ global_datediff_macro('{{user.Var(\"test_time_stamp\")}}') }}"
+      - entity_var:
+          name: num_d
+          select: max(num_d) # TODO: FIX: if num_d here is wrapped inside the var method, the run fails.
+          from: inputs/tbl_d
+      - entity_var:
+          name: var_with_figures
+          select: 12.347
+          column_data_type: '{{warehouse.DataType("float")}}'
+      - entity_var:
+          name: var_with_figures_without_type
+          select: 12.347
+      - entity_var:
+          name: id1_count_distinct
+          select: count (distinct id1)
+          from: inputs/tbl_a

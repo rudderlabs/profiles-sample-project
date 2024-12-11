@@ -1,0 +1,33 @@
+name: sample_test
+schema_version: 85
+retention_period: 24h
+connection: test
+model_folders:
+  - models
+entities:
+  - name: user
+    description: Platform Users. May include buyers and sellers both.
+    id_stitcher: models/test_id__
+    id_types:
+      - test_id
+      - email
+    feature_views:
+      using_ids:
+        - id: user_main_id
+id_types:
+  - name: test_id
+    filters:
+      - type: include
+        regex: "([0-9a-z])*"
+  - name: exclude_id
+  - name: email
+    filters:
+      - type: include
+        regex: ".+@.+"
+      - type: exclude
+        value: "a@a.com"
+available_tags:
+  - name: revenue
+    description: all revenue related tags
+  - name: default
+  - name: test

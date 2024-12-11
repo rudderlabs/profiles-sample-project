@@ -1,0 +1,6 @@
+ID1,ID2,NUM_C,NUM_B
+'c@c.com','b',3,12
+'','1',4,11
+'i@j.k',NULL,5,11
+'p@q.in','i',6,1
+NULL,NULL,7,11
