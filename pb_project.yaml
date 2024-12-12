@@ -1,5 +1,5 @@
 name: sample_test
-schema_version: 85
+schema_version: 79
 retention_period: 24h
 connection: test
 model_folders:
